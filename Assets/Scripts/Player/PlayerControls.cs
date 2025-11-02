@@ -10,7 +10,7 @@ public class PlayerControls : MonoBehaviour
 
     [Header("Rotation Settings")]
     [Tooltip("Degrees per second at full drag distance.")]
-    public float rotationSpeed = 150f;
+    public float rotationSpeed = 50f;
     [Tooltip("Smooth damping after releasing drag.")]
     public float inertiaDuration = 0.25f;
 

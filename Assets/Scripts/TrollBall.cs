@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using NUnit.Framework.Internal.Commands;
 
 public class TrollBall : MonoBehaviour
 {
@@ -18,15 +19,10 @@ public class TrollBall : MonoBehaviour
     [SerializeField] private Vector3 attachOffset = new Vector3(0.5f, 0f, 0.5f);
 
     [Tooltip("Temporary gravity scale when attached to player.")]
-    [SerializeField] private float heavyGravity = 20f;
+    [SerializeField] private float heavyGravity = 50f;
 
-    private float defaultGravity;
     private bool isAttached = false;
 
-    private void Awake()
-    {
-        defaultGravity = Physics.gravity.y;
-    }
 
     private void Start()
     {
@@ -62,6 +58,9 @@ public class TrollBall : MonoBehaviour
         if (playerTransform == null)
             playerTransform = other.transform;
 
+        transform.SetParent(playerTransform);
+        StartCoroutine(WaitTrollDuration());
+
         isAttached = true;
 
         // Increase gravity
@@ -78,10 +77,15 @@ public class TrollBall : MonoBehaviour
         }
     }
 
+    private IEnumerator WaitTrollDuration()
+    {
+        yield return new WaitForSeconds(3f);
+        DetachFromPlayer();
+    }
+
     public void DetachFromPlayer()
     {
         isAttached = false;
-        // Reset gravity to default
-        Physics.gravity = new Vector3(0, defaultGravity, 0);
+        Destroy(gameObject);
     }
 }
