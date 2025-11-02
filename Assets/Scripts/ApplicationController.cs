@@ -9,9 +9,14 @@ public class ApplicationController : Singleton<ApplicationController>
     public static readonly string SceneName_Level2 = "Level2";
     public static readonly string SceneName_Level3 = "Level3";
 
+    private void Start()
+    {
+        LoadMainMenu();
+    }
+
     public void LoadMainMenu()
     {
-        SceneManager.LoadSceneAsync(SceneName_MainMenu);
+        SceneManager.LoadSceneAsync(SceneName_MainMenu, LoadSceneMode.Additive);
     }
 
     public void LoadLevel(string levelName)
