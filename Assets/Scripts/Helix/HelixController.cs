@@ -41,7 +41,12 @@ public class HelixController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (_playerTransform.position.y < transform.position.y)
+        if (_playerTransform == null)
+        {
+            _playerTransform = GameController.Instance.FindPlayerInScene(gameObject).transform;
+        }
+
+        if (_playerTransform.position.y < transform.position.y && !_broken)
         {
             BreakApart();
         }

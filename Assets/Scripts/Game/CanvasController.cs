@@ -97,14 +97,14 @@ public class CanvasController : MonoBehaviour
         if (!string.IsNullOrEmpty(restartSceneName))
         {
 
-            SceneManager.LoadSceneAsync(restartSceneName, LoadSceneMode.Additive);
             SceneManager.UnloadSceneAsync(gameObject.scene);
+            SceneManager.LoadSceneAsync(restartSceneName, LoadSceneMode.Additive);
         }
         else
         {
 
-            SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Additive);
             SceneManager.UnloadSceneAsync(gameObject.scene);
+            SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Additive);
 
         }
     }
