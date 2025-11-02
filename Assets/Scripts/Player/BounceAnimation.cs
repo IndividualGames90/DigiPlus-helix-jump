@@ -84,6 +84,12 @@ public class BounceAnimation : MonoBehaviour
                 HandleHelixHit(hit);
                 StartCoroutine(DoBounce(hit.point));
             }
+            else if (hit.collider.CompareTag("Gear"))
+            {
+                HandleHelixHit(hit);
+                StartCoroutine(DoBounce(hit.point));
+                ScoreController.Instance.ResetStreak();
+            }
             else if (hit.collider.CompareTag("Lava"))
             {
                 GameController.Instance.GameOver(0);

@@ -8,6 +8,7 @@ TagManager:
   - FinishGame
   - Lava
   - BonusHelix
+  - Gear
   layers:
   - Default
   - TransparentFX

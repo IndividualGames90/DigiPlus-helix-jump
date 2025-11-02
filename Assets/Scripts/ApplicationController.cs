@@ -21,21 +21,23 @@ public class ApplicationController : Singleton<ApplicationController>
 
     public void LoadLevel(string levelName)
     {
+
         switch (levelName)
         {
             case "Level1":
-                SceneManager.LoadSceneAsync(SceneName_Level1);
+                SceneManager.LoadSceneAsync(SceneName_Level1, LoadSceneMode.Additive);
                 break;
             case "Level2":
-                SceneManager.LoadSceneAsync(SceneName_Level2);
+                SceneManager.LoadSceneAsync(SceneName_Level2, LoadSceneMode.Additive);
                 break;
             case "Level3":
-                SceneManager.LoadSceneAsync(SceneName_Level3);
+                SceneManager.LoadSceneAsync(SceneName_Level3, LoadSceneMode.Additive);
                 break;
             default:
-                SceneManager.LoadSceneAsync(SceneName_Level1);
+                SceneManager.LoadSceneAsync(SceneName_Level1, LoadSceneMode.Additive);
                 break;
         }
+        SceneManager.UnloadSceneAsync(SceneName_MainMenu);
     }
 
     public void QuitApplication()

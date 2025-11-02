@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameController : Singleton<GameController>
 {
@@ -7,6 +8,26 @@ public class GameController : Singleton<GameController>
     [SerializeField] private string _currentSceneName = "MainMenu";
 
     public Transform PlayerTransform;
+
+    public GameObject FindPlayerInScene(GameObject context)
+    {
+        Scene scene = context.scene;
+
+        foreach (GameObject root in scene.GetRootGameObjects())
+        {
+            if (root.CompareTag("Player"))
+                return root;
+
+            Transform[] children = root.GetComponentsInChildren<Transform>(true);
+            foreach (Transform child in children)
+            {
+                if (child.CompareTag("Player"))
+                    return child.gameObject;
+            }
+        }
+
+        return null;
+    }
 
     public Action<int> GameOverEvent;
 

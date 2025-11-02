@@ -95,9 +95,18 @@ public class CanvasController : MonoBehaviour
     {
         // Reload level or load given scene
         if (!string.IsNullOrEmpty(restartSceneName))
-            SceneManager.LoadScene(restartSceneName);
+        {
+
+            SceneManager.LoadSceneAsync(restartSceneName, LoadSceneMode.Additive);
+            SceneManager.UnloadSceneAsync(gameObject.scene);
+        }
         else
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        {
+
+            SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Additive);
+            SceneManager.UnloadSceneAsync(gameObject.scene);
+
+        }
     }
 
     public void DoBounceAnimation(GameObject uiElement, float bounceScale = 1.2f, float duration = 0.25f)
