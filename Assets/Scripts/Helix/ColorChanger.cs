@@ -23,14 +23,14 @@ public class ColorChanger : Singleton<ColorChanger>
     {
         if (!meshObject || !brokenMaterial)
         {
-            Debug.LogWarning("ColorChanger: Missing meshObject or brokenMaterial.");
+            //Debug.LogWarning("ColorChanger: Missing meshObject or brokenMaterial.");
             return;
         }
 
         Renderer rend = meshObject.GetComponent<Renderer>();
         if (!rend)
         {
-            Debug.LogWarning($"ColorChanger: No Renderer found on {meshObject.name}.");
+            //Debug.LogWarning($"ColorChanger: No Renderer found on {meshObject.name}.");
             return;
         }
 

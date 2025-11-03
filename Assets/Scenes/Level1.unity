@@ -5120,6 +5120,7 @@ MonoBehaviour:
   bounceVFXPrefab: {fileID: 2786502029991665053, guid: b72c2efc2a83fb34fb2ed3ade6684d47, type: 3}
   vfxOffset: {x: 0, y: 0.1, z: 0}
   vfxLifetime: 2
+  raycastInterval: 0.03
 --- !u!4 &1313408769 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 594913372347569552, guid: bab5655f0575a8645876b7d4ff87e857, type: 3}

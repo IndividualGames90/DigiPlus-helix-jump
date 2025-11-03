@@ -41,7 +41,7 @@ public class TapController : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning("No SimpleBounce found on Helix object: " + hit.collider.name);
+                    //Debug.LogWarning("No SimpleBounce found on Helix object: " + hit.collider.name);
                 }
             }
         }

@@ -14,8 +14,8 @@ public class LevelLoader : MonoBehaviour
     {
         if (playButton != null)
             playButton.onClick.AddListener(OnPlay);
-        else
-            Debug.LogWarning("Play button not assigned in LevelLoader!");
+        else { }
+            //Debug.LogWarning("Play button not assigned in LevelLoader!");
     }
 
     /// <summary>
@@ -35,7 +35,7 @@ public class LevelLoader : MonoBehaviour
     {
         if (string.IsNullOrEmpty(selectedLevelName))
         {
-            Debug.LogWarning("No level selected! Please call SelectLevel before playing.");
+            //Debug.LogWarning("No level selected! Please call SelectLevel before playing.");
             return;
         }
 

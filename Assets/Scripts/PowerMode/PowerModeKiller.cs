@@ -12,7 +12,7 @@ public class PowerModeKiller : MonoBehaviour
             powerMode = FindFirstObjectByType<PowerMode>();
             if (powerMode == null)
             {
-                Debug.LogWarning("PowerModeKiller: No PowerMode found in scene!");
+                //Debug.LogWarning("PowerModeKiller: No PowerMode found in scene!");
             }
         }
     }

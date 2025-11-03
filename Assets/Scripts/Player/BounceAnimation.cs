@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using DG.Tweening;
+using DG.Tweening.Core;
+using DG.Tweening.Plugins.Options;
 using System.Collections;
-using System.Transactions;
-using System.Security.Cryptography;
 using System;
 
 [DisallowMultipleComponent]
@@ -19,19 +19,19 @@ public class BounceAnimation : MonoBehaviour
     public Rigidbody targetRigidbody;
 
     [Header("Bounce Settings")]
-    public float rayDistance = 0.2f;      // short downward check
-    public float bounceHeight = 1.5f;     // how high to go
-    public float bounceDuration = 0.25f;  // time to apex
-    public LayerMask helixLayerMask = ~0; // filter; ~0 = everything
+    public float rayDistance = 0.2f;
+    public float bounceHeight = 1.5f;
+    public float bounceDuration = 0.25f;
+    public LayerMask helixLayerMask = ~0;
 
     [Header("FX (optional)")]
     public bool useSquashStretch = true;
-    public float squashXz = 1.1f;         // >1 widens XZ at contact
-    public float stretchY = 0.9f;         // <1 shortens Y at contact
+    public float squashXz = 1.1f;
+    public float stretchY = 0.9f;
     public float squashDuration = 0.08f;
 
     [Header("Safety")]
-    public float bounceCooldown = 0.05f;   // avoid double-trigger
+    public float bounceCooldown = 0.05f;
 
     [Header("VFX")]
     [Tooltip("Prefab to spawn when the bounce begins (impact).")]
@@ -46,6 +46,17 @@ public class BounceAnimation : MonoBehaviour
     private Tween moveTween;
     private Tween scaleTween;
     private Vector3 initialScale;
+
+    [SerializeField, Tooltip("Minimum time in seconds between raycasts.")]
+    private float raycastInterval = 0.03f;
+
+    private float _lastRaycastTime;
+
+    // Cached tweens (typed)
+    private TweenerCore<Vector3, Vector3, VectorOptions> cachedMoveTween;
+    private TweenerCore<Vector3, Vector3, VectorOptions> cachedSquashTween;
+    private TweenerCore<Vector3, Vector3, VectorOptions> cachedUnsquashTween;
+    private bool tweensInitialized;
 
     void Awake()
     {
@@ -65,9 +76,14 @@ public class BounceAnimation : MonoBehaviour
     {
         moveTween?.Kill();
         scaleTween?.Kill();
+        cachedMoveTween?.Kill();
+        cachedSquashTween?.Kill();
+        cachedUnsquashTween?.Kill();
+
         if (targetRigidbody) targetRigidbody.useGravity = true;
         if (animatedTarget) animatedTarget.localScale = initialScale;
         isBouncing = false;
+        tweensInitialized = false;
     }
 
     void FixedUpdate()
@@ -77,7 +93,10 @@ public class BounceAnimation : MonoBehaviour
         if (isBouncing) return;
         if (Time.time - lastBounceTime < bounceCooldown) return;
 
-        // decide which origins to use
+        if (Time.time - _lastRaycastTime < raycastInterval)
+            return;
+        _lastRaycastTime = Time.time;
+
         if ((raycastOrigins == null || raycastOrigins.Length == 0) && raycastOrigin != null)
         {
             raycastOrigins = new Transform[] { raycastOrigin };
@@ -93,7 +112,6 @@ public class BounceAnimation : MonoBehaviour
 
             if (Physics.Raycast(origin.position, Vector3.down, out RaycastHit hit, rayDistance, helixLayerMask))
             {
-                // once a hit is found, handle and stop checking others
                 if (hit.collider.CompareTag("Helix"))
                 {
                     HandleHelixHit(hit);
@@ -118,7 +136,7 @@ public class BounceAnimation : MonoBehaviour
                     HandleBonusHelixHit(hit);
                 }
 
-                break; // stop after first valid hit
+                break;
             }
         }
     }
@@ -126,11 +144,8 @@ public class BounceAnimation : MonoBehaviour
     private IEnumerator HandleFinishHelixHit(RaycastHit hit)
     {
         yield return new WaitForSeconds(1);
-        try
-        {
-            Destroy(hit.transform.gameObject);
-        }
-        catch (NullReferenceException e) { }
+        try { Destroy(hit.transform.gameObject); }
+        catch (NullReferenceException) { }
     }
 
     private void HandleBonusHelixHit(RaycastHit hit)
@@ -143,7 +158,6 @@ public class BounceAnimation : MonoBehaviour
 
     private void HandleHelixHit(RaycastHit hit)
     {
-        // Find HelixController on the parent
         Transform helixParent = hit.collider.transform.parent;
         if (!helixParent) return;
 
@@ -155,20 +169,46 @@ public class BounceAnimation : MonoBehaviour
         }
     }
 
+    private void InitTweens()
+    {
+        if (tweensInitialized || !animatedTarget) return;
+        tweensInitialized = true;
+
+        float startY = animatedTarget.position.y;
+        float targetY = startY + bounceHeight;
+
+        cachedMoveTween = animatedTarget.DOMoveY(targetY, bounceDuration)
+            .SetEase(Ease.OutQuad)
+            .SetAutoKill(false)
+            .Pause();
+
+        Vector3 squashed = new Vector3(initialScale.x * squashXz,
+                                       initialScale.y * stretchY,
+                                       initialScale.z * squashXz);
+
+        cachedSquashTween = animatedTarget.DOScale(squashed, squashDuration)
+            .SetEase(Ease.OutQuad)
+            .SetAutoKill(false)
+            .Pause();
+
+        cachedUnsquashTween = animatedTarget.DOScale(initialScale, squashDuration)
+            .SetEase(Ease.OutQuad)
+            .SetAutoKill(false)
+            .Pause();
+    }
+
     private IEnumerator DoBounce(Vector3 contactPoint)
     {
+        InitTweens();
+
         isBouncing = true;
         lastBounceTime = Time.time;
 
-        // spawn VFX at the contact point (or near the ray origin)
         if (bounceVFXPrefab)
         {
             Vector3 spawnPos = (raycastOrigin ? raycastOrigin.position : transform.position) + vfxOffset;
-
-            // prefer to place VFX at actual hit point if close enough
             if (Vector3.Distance(spawnPos, contactPoint) < 1f)
                 spawnPos = contactPoint + vfxOffset;
-
             GameObject vfx = Instantiate(bounceVFXPrefab, spawnPos, Quaternion.identity);
             Destroy(vfx, vfxLifetime);
         }
@@ -182,35 +222,22 @@ public class BounceAnimation : MonoBehaviour
         float startY = animatedTarget.position.y;
         float targetY = startY + bounceHeight;
 
-        moveTween?.Kill();
-        scaleTween?.Kill();
-
-        // optional squash at contact
         if (useSquashStretch && animatedTarget)
         {
-            Vector3 squashed = new Vector3(initialScale.x * squashXz,
-                                           initialScale.y * stretchY,
-                                           initialScale.z * squashXz);
-            animatedTarget.localScale = initialScale;
-            scaleTween = animatedTarget.DOScale(squashed, squashDuration)
-                                       .SetEase(Ease.OutQuad);
+            cachedSquashTween.Restart();
         }
 
-        // go up with ease-out
-        moveTween = animatedTarget.DOMoveY(targetY, bounceDuration)
-                                  .SetEase(Ease.OutQuad);
+        cachedMoveTween.ChangeStartValue(new Vector3(animatedTarget.position.x, startY, animatedTarget.position.z))
+                       .ChangeEndValue(new Vector3(animatedTarget.position.x, targetY, animatedTarget.position.z), bounceDuration)
+                       .Restart();
 
-        yield return moveTween.WaitForCompletion();
+        yield return cachedMoveTween.WaitForCompletion();
 
-        // restore scale toward normal at apex
         if (useSquashStretch && animatedTarget)
         {
-            scaleTween?.Kill();
-            scaleTween = animatedTarget.DOScale(initialScale, squashDuration)
-                                       .SetEase(Ease.OutQuad);
+            cachedUnsquashTween.Restart();
         }
 
-        // tiny buffer at apex to avoid immediate re-hit
         yield return new WaitForSeconds(0.03f);
 
         if (targetRigidbody) targetRigidbody.useGravity = true;
@@ -226,7 +253,6 @@ public class BounceAnimation : MonoBehaviour
     }
 #endif
 
-    // optional: set targets at runtime
     public void SetTargets(Transform animate, Transform rayOrigin = null, Rigidbody rb = null)
     {
         animatedTarget = animate ? animate : transform;
@@ -234,5 +260,6 @@ public class BounceAnimation : MonoBehaviour
         targetRigidbody = rb ? rb : (animatedTarget ? animatedTarget.GetComponent<Rigidbody>() : null);
         if (!targetRigidbody) targetRigidbody = GetComponent<Rigidbody>();
         initialScale = animatedTarget.localScale;
+        tweensInitialized = false;
     }
 }
