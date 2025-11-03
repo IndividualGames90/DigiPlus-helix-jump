@@ -9335,7 +9335,7 @@ MonoBehaviour:
   _scoreNumber: {fileID: 674332399}
   _scoreCurrent: {fileID: 452579966}
   _scoreMultiplier: {fileID: 1800167018}
-  nextLevelSceneName: Level2
+  nextLevelSceneName: Level3
 --- !u!1 &2046526382
 GameObject:
   m_ObjectHideFlags: 0

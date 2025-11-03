@@ -5,6 +5,8 @@ public class SimpleBounce : MonoBehaviour
     [SerializeField] private GameObject _player;
     [SerializeField] private Transform _bounceLocation;
 
+    public string LevelName;
+
     [Header("Bounce Settings")]
     public float bounceForce = 10f;       // strength of the bounce
     public ForceMode forceMode = ForceMode.Impulse; // impulse for instant bounce

@@ -27,6 +27,10 @@ public class CanvasController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _scoreCurrent;
     [SerializeField] private TextMeshProUGUI _scoreMultiplier;
 
+    [Tooltip("Scene name or index to load when Next Level is clicked.")]
+    [SerializeField] private string nextLevelSceneName;
+
+
     private bool _raiseScoreLocked;
 
     public void UpdateCurrentScore(int newScore)
@@ -49,7 +53,11 @@ public class CanvasController : MonoBehaviour
 
         if (quitButton != null)
             quitButton.onClick.AddListener(OnQuitClicked);
+
+        if (nextLevelButton != null)
+            nextLevelButton.onClick.AddListener(OnNextLevelClicked);
     }
+
 
     private void OnDestroy()
     {
@@ -60,10 +68,19 @@ public class CanvasController : MonoBehaviour
             restartButton.onClick.RemoveListener(OnRestartClicked);
         if (quitButton != null)
             quitButton.onClick.RemoveListener(OnQuitClicked);
+        if (nextLevelButton != null)
+            nextLevelButton.onClick.RemoveListener(OnNextLevelClicked);
     }
 
-    public void OnGameOver(int score)
+
+    public void OnGameOver(int score, bool failed)
     {
+        if (!failed)
+        {
+            nextLevelButton.gameObject.SetActive(true);
+            restartButton.gameObject.SetActive(false);
+        }
+
         this.score.SetActive(false);
         gameOverMenu.SetActive(true);
         StartCoroutine(RaiseScore(ScoreController.Instance.GetScore()));
@@ -108,6 +125,35 @@ public class CanvasController : MonoBehaviour
 
         }
     }
+
+    private void OnNextLevelClicked()
+    {
+        // Load the next level scene by name, if provided
+        if (!string.IsNullOrEmpty(nextLevelSceneName))
+        {
+            SceneManager.UnloadSceneAsync(gameObject.scene);
+            SceneManager.LoadSceneAsync(nextLevelSceneName, LoadSceneMode.Additive);
+        }
+        else
+        {
+            // fallback: load next build index
+            int currentIndex = SceneManager.GetActiveScene().buildIndex;
+            int nextIndex = currentIndex + 1;
+
+            if (nextIndex < SceneManager.sceneCountInBuildSettings)
+            {
+                SceneManager.UnloadSceneAsync(gameObject.scene);
+                SceneManager.LoadSceneAsync(nextIndex, LoadSceneMode.Additive);
+            }
+            else
+            {
+                // if no next scene, return to Main Menu (index 0)
+                SceneManager.UnloadSceneAsync(gameObject.scene);
+                SceneManager.LoadSceneAsync(0, LoadSceneMode.Additive);
+            }
+        }
+    }
+
 
     public void DoBounceAnimation(GameObject uiElement, float bounceScale = 1.2f, float duration = 0.25f)
     {

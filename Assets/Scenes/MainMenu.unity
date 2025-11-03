@@ -558,6 +558,7 @@ MonoBehaviour:
   helixLayerMask:
     serializedVersion: 2
     m_Bits: 64
+  levelLoader: {fileID: 999283440}
 --- !u!1 &795709198
 GameObject:
   m_ObjectHideFlags: 0
@@ -1083,6 +1084,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _player: {fileID: 2073753330}
   _bounceLocation: {fileID: 1214747010}
+  LevelName: Level3
   bounceForce: 10
   forceMode: 1
 --- !u!1 &1115612650
@@ -1673,6 +1675,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _player: {fileID: 2073753330}
   _bounceLocation: {fileID: 2110340583}
+  LevelName: Level1
   bounceForce: 10
   forceMode: 1
 --- !u!1 &1487742995
@@ -2289,6 +2292,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _player: {fileID: 2073753330}
   _bounceLocation: {fileID: 1288870143}
+  LevelName: Level2
   bounceForce: 10
   forceMode: 1
 --- !u!1 &2049101115

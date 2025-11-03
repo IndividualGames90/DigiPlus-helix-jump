@@ -7,6 +7,8 @@ public class TapController : MonoBehaviour
     public float maxDistance = 100f;
     public LayerMask helixLayerMask; // Assign your Helix layer here in the Inspector
 
+    [SerializeField] private LevelLoader levelLoader;
+
     private void Awake()
     {
         if (!mainCamera) mainCamera = Camera.main;
@@ -33,6 +35,8 @@ public class TapController : MonoBehaviour
                 SimpleBounce bounce = hit.collider.GetComponent<SimpleBounce>();
                 if (bounce != null)
                 {
+
+                    levelLoader.SelectLevel(bounce.LevelName);
                     bounce.PositionPlayer();
                 }
                 else

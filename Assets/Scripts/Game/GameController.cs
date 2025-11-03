@@ -29,7 +29,7 @@ public class GameController : Singleton<GameController>
         return null;
     }
 
-    public Action<int> GameOverEvent;
+    public Action<int, bool> GameOverEvent;
 
     public static bool IsGameOver { get; private set; }
 
@@ -38,13 +38,13 @@ public class GameController : Singleton<GameController>
         IsGameOver = false;
     }
 
-    public void GameOver(int score)
+    public void GameOver(int score, bool failed = true)
     {
         if (IsGameOver) return;
 
         _playerControls.enabled = false;
         IsGameOver = true;
-        GameOverEvent?.Invoke(score);
+        GameOverEvent?.Invoke(score, failed);
         Debug.Log("Game Over!");
     }
 

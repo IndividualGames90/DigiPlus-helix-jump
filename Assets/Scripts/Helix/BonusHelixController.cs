@@ -37,6 +37,6 @@ public class BonusHelixController : HelixController
     public void BonusHelixHit()
     {
         ScoreController.Instance.AddBonusHelixBreak(_multiplierValue);
-        GameController.Instance.GameOver(ScoreController.Instance.GetScore());
+        GameController.Instance.GameOver(ScoreController.Instance.GetScore(), false);
     }
 }

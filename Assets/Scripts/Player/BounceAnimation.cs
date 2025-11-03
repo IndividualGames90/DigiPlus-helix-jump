@@ -13,6 +13,8 @@ public class BounceAnimation : MonoBehaviour
     public Transform animatedTarget;
     [Tooltip("Optional: where to cast the downward ray from. Defaults to animatedTarget (or this.transform).")]
     public Transform raycastOrigin;
+    [Tooltip("Optional: Multiple raycast origins. If empty, will use single raycastOrigin.")]
+    public Transform[] raycastOrigins;
     [Tooltip("Optional: Rigidbody whose gravity/velocity are controlled during bounce. If null, we'll search on animatedTarget, then on this GameObject.")]
     public Rigidbody targetRigidbody;
 
@@ -71,36 +73,52 @@ public class BounceAnimation : MonoBehaviour
     void FixedUpdate()
     {
         if (GameController.IsGameOver || PowerMode.Instance.IsInPowerMode) return;
-
-        if (!animatedTarget || !raycastOrigin) return;
+        if (!animatedTarget) return;
         if (isBouncing) return;
         if (Time.time - lastBounceTime < bounceCooldown) return;
 
-        // short downward ray from the chosen origin
-        if (Physics.Raycast(raycastOrigin.position, Vector3.down, out RaycastHit hit, rayDistance, helixLayerMask))
+        // decide which origins to use
+        if ((raycastOrigins == null || raycastOrigins.Length == 0) && raycastOrigin != null)
         {
-            if (hit.collider.CompareTag("Helix"))
+            raycastOrigins = new Transform[] { raycastOrigin };
+        }
+        else if (raycastOrigins == null || raycastOrigins.Length == 0)
+        {
+            raycastOrigins = new Transform[] { transform };
+        }
+
+        foreach (var origin in raycastOrigins)
+        {
+            if (!origin) continue;
+
+            if (Physics.Raycast(origin.position, Vector3.down, out RaycastHit hit, rayDistance, helixLayerMask))
             {
-                HandleHelixHit(hit);
-                StartCoroutine(DoBounce(hit.point));
-            }
-            else if (hit.collider.CompareTag("Gear"))
-            {
-                HandleHelixHit(hit);
-                StartCoroutine(DoBounce(hit.point));
-                ScoreController.Instance.ResetStreak();
-            }
-            else if (hit.collider.CompareTag("Lava"))
-            {
-                GameController.Instance.GameOver(0);
-            }
-            else if (hit.collider.CompareTag("FinishGame"))
-            {
-                StartCoroutine(HandleFinishHelixHit(hit));
-            }
-            else if (hit.collider.CompareTag("BonusHelix"))
-            {
-                HandleBonusHelixHit(hit);
+                // once a hit is found, handle and stop checking others
+                if (hit.collider.CompareTag("Helix"))
+                {
+                    HandleHelixHit(hit);
+                    StartCoroutine(DoBounce(hit.point));
+                }
+                else if (hit.collider.CompareTag("Gear"))
+                {
+                    HandleHelixHit(hit);
+                    StartCoroutine(DoBounce(hit.point));
+                    ScoreController.Instance.ResetStreak();
+                }
+                else if (hit.collider.CompareTag("Lava"))
+                {
+                    GameController.Instance.GameOver(0);
+                }
+                else if (hit.collider.CompareTag("FinishGame"))
+                {
+                    StartCoroutine(HandleFinishHelixHit(hit));
+                }
+                else if (hit.collider.CompareTag("BonusHelix"))
+                {
+                    HandleBonusHelixHit(hit);
+                }
+
+                break; // stop after first valid hit
             }
         }
     }
