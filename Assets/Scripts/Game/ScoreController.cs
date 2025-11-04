@@ -27,6 +27,11 @@ public class ScoreController : Singleton<ScoreController>
         _canvas.UpdateCurrentScore(0);
     }
 
+    private void OnEnable()
+    {
+        ResetStreak();
+    }
+
     public void AddHelixBreak()
     {
         currentStreak++;
